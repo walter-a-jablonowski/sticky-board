@@ -1,0 +1,51 @@
+/*@-------------------------------------------------------
+| Walter A. Jablonowski     walter-a-jablonowski.github.io
+----------------------------------------------------------  
+|
+| Board
+|
+|
+| Contents:  # (have fun)
+|
+|   - Board item
+|
+-------------------------------------------------------@*/
+
+
+/*@-------------------------------------------------------
+| Board item
+-------------------------------------------------------@*/
+
+/* 
+.ui-draggable, .ui-droppable {
+	background-position: top;
+}
+*/
+
+.board-item {
+  width:      255px;
+  height:     255px;
+  min-width:  255px;  /* no col break */
+  min-height: 255px;
+  /* padding: 2px 5px 5px 5px; */
+  background-color: #ddd; 
+}
+
+.board-item .ui-widget-header {
+  /* margin: 0; */
+  background-color: #ddd; 
+  cursor: move;
+}
+
+.board-item .del-item-btn {
+  border: 0;
+  padding: 0;
+}
+
+.board-item textarea {
+  width: 100%;
+  height: 90%;
+  border: 0;
+  background-color: inherit;
+  resize: none;
+}
