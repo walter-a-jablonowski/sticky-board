@@ -2,7 +2,7 @@
 
 **based on jquery ui and bootstrap**
 
-CURRENTLY UNDER DEVELOPMENT
+CURRENTLY IN DEVELOPMENT
 
 
 - Very few lines of code
