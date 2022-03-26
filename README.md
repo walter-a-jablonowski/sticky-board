@@ -32,6 +32,6 @@ CURRENTLY IN DEVELOPMENT
 
 Copyright (C) Walter A. Jablonowski 2020-2022, MIT [License](LICENSE)
 
-Licenses of third party software used see [credits](credits.md)
+Licenses of third party software used see [credits](credits.txt)
 
 [Privacy](https://walter-a-jablonowski.github.io/privacy.html) | [Legal](https://walter-a-jablonowski.github.io/imprint.html)
