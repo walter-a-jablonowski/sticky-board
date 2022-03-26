@@ -1,37 +1,98 @@
-<!DOCTYPE html>
+<?php
+
+require 'config.php';
+require 'vendor_manual/inc.php';
+
+// TASK: COULD upgrade 2 a simple PHP controller
+
+$fld = ! empty($_GET['fld']) ? BASE_DIR . '/' . trim($_GET['fld'], "/ ") : BASE_DIR;
+
+// var_dump($fld);
+// exit();
+
+if( ! is_dir($fld) )
+  exit("URL arg 'fld' missing or given folder is no dir");
+
+$cache = file_exists("$fld/.free-view.json")
+       ? json_decode( file_get_contents("$fld/.free-view.json"), true)
+       : null;
+
+$entities = [];
+$files = scandir($fld);
+
+foreach( $files as $file )
+{
+  $entity = [];
+  $ext = pathinfo("$fld/$file")['extension'] ?? null;
+
+  if( is_dir("$fld/$file") & ! in_array($file, ['.', '..']))
+   $entity['type'] = 'folder';
+ 
+  elseif( is_file("$fld/$file") && $ext === 'md')
+   $entity['type'] = 'text';
+
+  elseif( is_file("$fld/$file") && in_array($ext, ['png', 'jpg', 'jpeg']))
+   $entity['type'] = 'image';
+
+  if( $entity )
+  {
+    $entities[] = array_merge( $entity, [
+
+      'name' => basename($file, ".$ext"),
+      'file' => $file,
+      'full' => "$fld/$file"
+    ]);
+  }
+}
+
+// var_dump( $headline );
+// exit();
+
+?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Board</title>
+  <title>View</title>
 
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
+  <!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> -->
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  
+  <!-- fontawesome 4 -->
 
-  <link rel="stylesheet" href="public/styles/app.css">
-  <link rel="stylesheet" href="public/styles/board.css">
+  <!-- fontawesome 6 -->
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+  <!-- free icons: https://fontawesome.com/v6/search?m=free -->
 
-  <!-- Head JS -->
+  <link rel="stylesheet" href="styles/app.css">
+  <link rel="stylesheet" href="styles/widg.css">
 
-  <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
-  <!-- jquery ui (sample https://jqueryui.com/draggable/#handle) -->
-  <!-- sample was <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <?php
+    
+    foreach($entities as $entity)
+    {
+      if( is_file("view/$entity[type]/styles.css"))
+        print "<link rel=\"stylesheet\" href=\"view/$entity[type]/styles.css\">";
+    }
+  
+  ?>
 
 </head>
-<body style="display: none;">
+<body style="display: none;" data-fld="<?= $fld ?>">
 
 
 <!-- Nav -->
 
 <nav class="navbar navbar-light bg-light py-0">
-  <a class="navbar-brand" href="#">Board</a>
+  <a class="navbar-brand" href="#"><b>View</b> <?= basename($fld) ?></a>
   <form class="form-inline">
-    <button id="saveBoardBtn" class="btn btn-sm btn-secondary my-2 my-sm-0 mr-2" type="button">Save layout</button>
+    <button class="btn btn-sm btn-secondary my-2 my-sm-0 mr-2" type="button">Tools here</button>
+<!--
+    <button onclick="crl.update()" class="btn btn-sm btn-secondary my-2 my-sm-0 mr-2" type="button">Update</button>
+    <button onclick="crl.saveLayout()" class="btn btn-sm btn-secondary my-2 my-sm-0 mr-2" type="button">Save</button>
+-->
   </form>
 </nav>
 
@@ -42,52 +103,34 @@
   <div class="row justify-content-center h-100">
 
     <!-- Area full width -->
+    <div id="view" class="col-md-12 h-100">
 
-    <div id="board" class="col-md-12 h-100">
+      <!-- Widg -->
 
-      <!-- Board item -->
+      <?php
 
-      <div class="board-item ui-widget-content">
-        <div class="container h-100 px-1">
+        $i = 1;
+      
+        foreach($entities as $entity)
+        {
+          $content = inc("view/$entity[type]/view.php", $entity);
           
-          <div class="row">
-        
-            <div class="col-7">
-              <span class="ui-widget-header">Text</span>  <!-- float-left -->
-              <!-- <input type="text" placeholder="Headline"> -->
-            </div>
+          print inc('widg.php', [
+            'type'    => $entity['type'],
+            'name'    => $entity['name'],
+            'file'    => $entity['file'],
+            'content' => $content,
+            'x'       => ! $cache || ! isset( $cache[ $entity['file'] ])  ?  11 + $i * 100  :  $cache[ $entity['file'] ]['x'],
+            'y'       => ! $cache || ! isset( $cache[ $entity['file'] ])  ?  11             :  $cache[ $entity['file'] ]['y'],
+            'width'   => ! $cache || ! isset( $cache[ $entity['file'] ])  ?  100            :  $cache[ $entity['file'] ]['width'],
+            'height'  => ! $cache || ! isset( $cache[ $entity['file'] ])  ?  100            :  $cache[ $entity['file'] ]['height']
+          ]);
 
-            <div class="col text-right">
-
-              <div class="color-picker dropdown d-inline-block ml-2">
-
-                <!-- TASK: picker -->
-
-                <a href="#" class="dropdown-toggle small" role="button" id="dropdownMenuButton" data-toggle="dropdown">Color</a>
-                <div class="dropdown-menu" style="background-color: #000;">
-                  <a class="dropdown-item" href="#" style="background-color: #ffa351;">&nbsp;</a>
-                  <a class="dropdown-item" href="#" style="background-color: #eee657;">&nbsp;</a>
-                  <a class="dropdown-item" href="#" style="background-color: #81de76;">&nbsp;</a>
-                  <a class="dropdown-item" href="#" style="background-color: #fc6042;">&nbsp;</a>
-                  <a class="dropdown-item" href="#" style="background-color: #ddd;">&nbsp;</a>
-                </div>
-              </div>
-              
-              <div class="d-inline-block">&nbsp;</div>
-
-              <button class="del-item-btn btn btn-sm mr-1 pb-1 d-inline-block" type="button">x</button>  <!-- float-right -->
-
-            </div>
-          </div>
-          
-          <div class="row h-100">
-            <div class="col-12 h-100">
-              <textarea placeholder="Details"></textarea>
-            </div>
-          </div>
-
-        </div>      
-      </div>
+          if( ! $cache || ! isset( $cache[ $entity['file'] ]))
+            $i++;
+        }
+      
+      ?>
 
     </div>
 
@@ -98,24 +141,32 @@
 <!-- Footer -->
 
 <footer class="footer">
-  <div class="container">
-    <span class="text-muted small">powered by &copy; <a href="http://walter-a-jablonowski.github.io" target="_blank" class="text-info">Walter A. Jablonowski</a> 2020</span>
+  <div class="container text-muted small">
+    powered by &copy; <a href="http://walter-a-jablonowski.github.io" target="_blank">Walter A. Jablonowski</a> 2020-2022
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="https://pngtree.com/free-backgrounds">free background photos from pngtree.com</a>
   </div>
 </footer>
 
 
+<!-- jquery ui (sample https://jqueryui.com/draggable/#handle) -->
+
+<!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
+<!-- <script src="https://code.jquery.com/jquery-1.13.1.js"></script> -->
+<!-- <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-<script src="public/js/board.js"></script>
-
-<script>
-  $(function() {
-
-    $('body').fadeIn();
-
-  });
-</script>
+<!-- TASK; SHOULD figure out how we can use some simple native js import -->
+<script src="vendor_manual/js-lib/events.js"></script>
+<script src="vendor_manual/js-lib/query.js"></script>
+<script src="vendor_manual/js-lib/ajax.js"></script>
+<script src="vendor_manual/js-lib/show_hide.js"></script>
+<script src="controller.js"></script>
 
 </body>
 </html>

@@ -1,36 +1,36 @@
 # Mini sticky application
 
-**based on jquery ui and bootstrap**
+Instantly turns a file system folder in a sticky board, minimal lines of code
 
 CURRENTLY IN DEVELOPMENT
 
-
-- Very few lines of code
-- Loads all md files from a folder
+- Displays text (md), images and folder
 - Move as you like, change color
-- Saves position and colors `.view-config.yml`
-
-
-## Usage
-
-- `composer install`
-- Config set base folder
-- Call with folder index.php?fld=my/folder
-
-
-## Possible future features
-
-- Save edited file
-- New file
-- Remove file
-- Show more file types: image, url, ...
+- Ability to add new files found in file sys
+- ignores removed files
+- Saves position and colors `.view-config.json`
 
 [Img]
 
 
+## Usage
+
+- `composer isstall`
+- Edit config set base folder
+
+
+## Possible future features
+
+- Show more file types: url, ...
+- Edited file
+  - edit btn full screen overlay
+- New file
+- Remove file
+
+
 ## License
 
-Copyright (C) Walter A. Jablonowski 2020, MIT [License](LICENSE)
+Copyright (C) Walter A. Jablonowski 2020-2022, MIT [License](LICENSE)
 
 Licenses of third party software used see [credits](credits.md)
 
