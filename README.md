@@ -1,6 +1,6 @@
 # Mini sticky application
 
-<span style="color: red; font-weight: bold;">new version:</span> [sticky-board](https://github.com/walter-a-jablonowski/sticky-board)
+<span style="color: red; font-weight: bold;">new version:</span> [sticky](https://github.com/walter-a-jablonowski/sticky)
 
 Instantly turns a file system folder in a sticky board, minimal lines of code
 
